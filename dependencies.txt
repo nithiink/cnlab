@@ -1,0 +1,298 @@
+XORRRRRRRRRRRRRR
+import numpy as np
+x=np.array([[0,0,1,1],[0,1,0,1]])
+y=np.array([[0,1,1,0]])
+n_x = 2
+n_y = 1
+n_h = 2
+m = x.shape[1]
+lr = 0.1
+np.random.seed(2)
+w1 = np.random.rand(n_h,n_x)
+w2 = np.random.rand(n_y,n_h)
+losses = []
+def sigmoid(z):
+z= 1/(1+np.exp(-z))
+return z
+def forward_prop(w1,w2,x):
+z1 = np.dot(w1,x)
+a1 = sigmoid(z1)
+z2 = np.dot(w2,a1)
+a2 = sigmoid(z2)
+return z1,a1,z2,a2
+def back_prop(m,w1,w2,z1,a1,z2,a2,y):
+dz2 = a2-y
+dw2 = np.dot(dz2,a1.T)/m
+dz1 = np.dot(w2.T,dz2) * a1*(1-a1)
+dw1 = np.dot(dz1,x.T)/m
+dw1 = np.reshape(dw1,w1.shape)
+dw2 = np.reshape(dw2,w2.shape)
+return dz2,dw2,dz1,dw1
+iterations = 10000
+for i in range(iterations):
+z1,a1,z2,a2 = forward_prop(w1,w2,x)
+loss = -(1/m)*np.sum(y*np.log(a2)+(1-y)*np.log(1-a2))
+losses.append(loss)
+da2,dw2,dz1,dw1 = back_prop(m,w1,w2,z1,a1,z2,a2,y)
+w2 = w2-lr*dw2
+w1 = w1-lr*dw1
+def predict(w1,w2,input):
+z1,a1,z2,a2 = forward_prop(w1,w2,input)
+a2 = np.squeeze(a2)
+if a2>=0.5:
+print("For input", [i[0] for i in input], "output is 1")
+else:
+print("For input", [i[0] for i in input], "output is 0")
+test = np.array([[1],[0]])
+predict(w1,w2,test)
+test = np.array([[1],[1]])
+predict(w1,w2,test)
+test = np.array([[0],[1]])
+predict(w1,w2,test)
+test = np.array([[0],[0]])
+predict(w1,w2,test)
+
+
+STRAIGHT && QUADRATIC FIT
+# importing packages and modules
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import scipy.stats as stats
+import random, math
+data = [[98, 95], [56, 60], [78, 70], [87, 90], [60, 65], [94, 91], [63, 60], [72, 75], [98, 100], [78, 80],
+[70, 75], [80, 82], [90, 93], [86, 95], [67, 70], [90, 85], [79, 69], [69, 60], [71, 60], [70, 68]]
+random.shuffle(data)
+val = int(0.8*len(data))
+train = data[0:val]
+test = data[val:]
+test_x = []
+test_y = []
+for i in test:
+test_x.append(i[0])
+test_y.append(i[1])
+dictionary = {'X' : [], 'Y' : []}
+for d in train:
+dictionary['X'].append(d[0])
+dictionary['Y'].append(d[1])
+data = dictionary
+dataset = pd.DataFrame(data)
+sns.scatterplot(data=dataset, x='X', y='Y')
+plt.title('Quiz Marks vs Final Marks')
+plt.xlabel('Quiz Marks')
+plt.ylabel('Final Marks')
+model = np.poly1d(np.polyfit(dataset['X'], dataset['Y'], 1)) // 1 ku bathila 2 podra mutta bunda
+# polynomial line visualization
+polyline = np.linspace(50, 100, 100)
+plt.scatter(dataset['X'], dataset['Y'])
+plt.plot(polyline, model(polyline))
+plt.show()
+predict_y = model(test_x)
+mse = 0
+for i in range(len(predict_y)):
+# print(f"x={test_x[i]} Predicted value={predictions[i]} y={test_y[i]}")
+mse += (predict_y[i] - test_y[i])**2
+mse /= len(predict_y)
+mse = math.sqrt(mse)
+print(f"MSE : {mse}")
+print(f"RMSE : {mse**0.5}")
+data = [[98, 95], [56, 60], [78, 70], [87, 90], [60, 65], [94, 91], [63, 60], [72, 75], [98, 100], [78, 80],
+[70, 75], [80, 82], [90, 93], [86, 95], [67, 70], [90, 85], [79, 69], [69, 60], [71, 60], [70, 68]]
+dictionary = {'X' : [], 'Y' : []}
+for d in data:
+dictionary['X'].append(d[0])
+dictionary['Y'].append(d[1])
+print(dictionary)
+
+
+Hand
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+data = pd.read_csv('train.csv')
+data = np.array(data)
+m, n = data.shape
+np.random.shuffle(data) # shuffle before splitting into dev and training sets
+data_dev = data[0:1000].T
+Y_dev = data_dev[0]
+X_dev = data_dev[1:n]
+X_dev = X_dev / 255.
+data_train = data[1000:m].T
+Y_train = data_train[0]
+X_train = data_train[1:n]
+X_train = X_train / 255.
+_,m_train = X_train.shape
+def init_params():
+W1 = np.random.rand(10, 784) - 0.5
+b1 = np.random.rand(10, 1) - 0.5
+W2 = np.random.rand(10, 10) - 0.5
+b2 = np.random.rand(10, 1) - 0.5
+return W1, b1, W2, b2
+def ReLU(Z):
+return np.maximum(Z, 0)
+def softmax(Z):
+A = np.exp(Z) / sum(np.exp(Z))
+return A
+def forward_prop(W1, b1, W2, b2, X):
+Z1 = W1.dot(X) + b1
+A1 = ReLU(Z1)
+Z2 = W2.dot(A1) + b2
+A2 = softmax(Z2)
+return Z1, A1, Z2, A2
+def ReLU_deriv(Z):
+return Z > 0
+def one_hot(Y):
+one_hot_Y = np.zeros((Y.size, Y.max() + 1))
+one_hot_Y[np.arange(Y.size), Y] = 1
+one_hot_Y = one_hot_Y.T
+return one_hot_Y
+def backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y):
+one_hot_Y = one_hot(Y)
+dZ2 = A2 - one_hot_Y
+dW2 = 1 / m * dZ2.dot(A1.T)
+db2 = 1 / m * np.sum(dZ2)
+dZ1 = W2.T.dot(dZ2) * ReLU_deriv(Z1)
+dW1 = 1 / m * dZ1.dot(X.T)
+db1 = 1 / m * np.sum(dZ1)
+return dW1, db1, dW2, db2
+def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
+W1 = W1 - alpha * dW1
+b1 = b1 - alpha * db1
+W2 = W2 - alpha * dW2
+b2 = b2 - alpha * db2
+return W1, b1, W2, b2
+def get_predictions(A2):
+return np.argmax(A2, 0)
+def get_accuracy(predictions, Y):
+print(predictions, Y)
+return np.sum(predictions == Y) / Y.size
+def gradient_descent(X, Y, alpha, iterations):
+W1, b1, W2, b2 = init_params()
+for i in range(iterations):
+Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
+dW1, db1, dW2, db2 = backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y)
+W1, b1, W2, b2 = update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
+if i % 10 == 0:
+print("Iteration: ", i)
+predictions = get_predictions(A2)
+print(get_accuracy(predictions, Y))
+return W1, b1, W2, b2
+W1, b1, W2, b2 = gradient_descent(X_train, Y_train, 0.10, 500)
+def make_predictions(X, W1, b1, W2, b2):
+_, _, _, A2 = forward_prop(W1, b1, W2, b2, X)
+predictions = get_predictions(A2)
+return predictions
+def test_prediction(index, W1, b1, W2, b2):
+current_image = X_train[:, index, None]
+prediction = make_predictions(X_train[:, index, None], W1, b1, W2, b2)
+label = Y_train[index]
+print("Prediction: ", prediction)
+print("Label: ", label)
+current_image = current_image.reshape((28, 28)) * 255
+plt.gray()
+plt.imshow(current_image, interpolation='nearest')
+plt.show()
+test_prediction(0, W1, b1, W2, b2)
+test_prediction(1, W1, b1, W2, b2)
+test_prediction(2, W1, b1, W2, b2)
+test_prediction(3, W1, b1, W2, b2)
+# dev_predictions = make_predictions(X_dev, W1, b1, W2, b2)
+# get_accuracy(dev_predictions, Y_dev)
+
+
+ID3
+import pandas as pd
+import math
+import numpy as np
+# Load the PlayTennis dataset
+# upload=files.upload()
+data = pd.read_csv("/content/data - Sheet1.csv")
+# Define the ID3 algorithm function
+def id3(data, target_attribute_name, attribute_names, default_class=None):
+# Count the number of each target class in the data
+classes, class_counts = np.unique(data[target_attribute_name], return_counts=True)
+# If all the data belongs to a single class, return that class
+if len(classes) == 1:
+return classes[0]
+# If there are no attributes left to split on, return the default class
+if len(attribute_names) == 0:
+return default_class
+# Calculate the entropy of the current data
+entropy = calculate_entropy(data[target_attribute_name], class_counts)
+# Initialize variables for tracking the best attribute and its information gain
+best_info_gain = -1
+best_attribute = None
+# Loop over all attributes and calculate their information gain
+for attribute in attribute_names:
+attribute_values, attribute_counts = np.unique(data[attribute], return_counts=True)
+# Calculate the weighted entropy of each possible value of the attribute
+weighted_entropy = 0
+for i in range(len(attribute_values)):
+subset = data[data[attribute] == attribute_values[i]]
+subset_classes, subset_class_counts = np.unique(subset[target_attribute_name],
+return_counts=True)
+weighted_entropy += (attribute_counts[i] / len(data)) *
+calculate_entropy(subset[target_attribute_name], subset_class_counts)
+# Calculate the information gain of the attribute
+info_gain = entropy - weighted_entropy
+# Update the best attribute and its information gain if this one is better
+if info_gain > best_info_gain:
+best_info_gain = info_gain
+best_attribute = attribute
+# Create a new decision tree node with the best attribute
+tree = {best_attribute: {}}
+# Remove the best attribute from the list of attribute names
+attribute_names = [attr for attr in attribute_names if attr != best_attribute]
+# Loop over the possible values of the best attribute and create a subtree for each one
+for value in np.unique(data[best_attribute]):
+# Recursively call the ID3 algorithm on the subset of data with this value of the best
+attribute
+subtree = id3(data[data[best_attribute] == value], target_attribute_name, attribute_names,
+default_class)
+# Add this subtree to the main decision tree node
+tree[best_attribute][value] = subtree
+# If the default class is not None, add a subtree for missing attribute values
+if default_class is not None:
+tree["default"] = default_class
+return tree
+# Define a function to calculate the entropy of a set of target classes
+def calculate_entropy(target_attribute, class_counts):
+entropy = 0
+total = sum(class_counts)
+for count in class_counts:
+probability = count / total
+entropy -= probability * math.log2(probability)
+return entropy
+# Define the attribute names and target attribute for the PlayTennis dataset
+attribute_names = ["Outlook", "Temperature", "Humidity", "Windy"]
+target_attribute_name = "PlayTennis"
+# Run the ID3 algorithm on the PlayTennis dataset
+decision_tree = id3(data, target_attribute_name, attribute_names)
+# Print the resulting decision tree
+print(decision_tree)
+
+
+SVM
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+# Load the MNIST dataset
+digits = load_digits()
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(digits.data, digits.target, test_size=0.2,
+random_state=42)
+# Train SVM with different kernels
+svc_linear = SVC(kernel='linear')
+svc_linear.fit(X_train, y_train)
+print("Accuracy of linear kernel:", svc_linear.score(X_test, y_test))
+svc_rbf = SVC(kernel='rbf')
+svc_rbf.fit(X_train, y_train)
+print("Accuracy of RBF kernel:", svc_rbf.score(X_test, y_test))
+# Train MLP neural network
+mlp = MLPClassifier(hidden_layer_sizes=(100,), max_iter=10, alpha=1e-4,
+solver='sgd', verbose=10, random_state=1,
+learning_rate_init=.1)
+mlp.fit(X_train, y_train)
+print("Accuracy of MLP neural network:", mlp.score(X_test, y_test))
